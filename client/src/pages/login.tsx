@@ -53,16 +53,19 @@ export default function Login() {
   };
 
   return (
-    <div className={`auth-container h-screen bg-gray-100 flex flex-col justify-center items-center py-2 px-4 ${isRtl ? "text-right" : "text-left"}`}>
-      <div className="auth-card w-full max-w-sm flex flex-col" style={{ maxHeight: '90vh' }}>
-        <div className="flex justify-center mb-3">
-          <TelemLogo className="auth-logo h-12" />
-        </div>
-
-        <Card className="overflow-hidden flex-shrink shadow-md">
-          <CardHeader className="py-3">
-            <CardTitle className="text-lg font-bold text-center">{t("login.title")}</CardTitle>
-            <CardDescription className="text-center text-xs">
+    <div 
+      className={`min-h-[100dvh] bg-gray-100 flex items-center justify-center p-0 m-0 ${isRtl ? "text-right" : "text-left"}`}
+      style={{ height: 'calc(var(--vh, 1vh) * 100)' }}  
+    >
+      <div className="absolute top-[15%] w-full flex justify-center">
+        <TelemLogo className="h-10" />
+      </div>
+      
+      <div className="w-[85%] max-w-[320px] transform translate-y-[2%]">
+        <Card className="shadow-lg border-0">
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-lg font-semibold text-center">{t("login.title")}</CardTitle>
+            <CardDescription className="text-center text-xs mt-1">
               {t("login.welcomeMessage")}
             </CardDescription>
           </CardHeader>
