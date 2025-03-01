@@ -57,11 +57,11 @@ export default function Login() {
       className={`min-h-[100dvh] bg-gray-100 flex items-center justify-center p-0 m-0 ${isRtl ? "text-right" : "text-left"}`}
       style={{ height: 'calc(var(--vh, 1vh) * 100)' }}  
     >
-      <div className="absolute top-[15%] w-full flex justify-center">
-        <TelemLogo className="h-10" />
-      </div>
-      
-      <div className="w-[85%] max-w-[320px] transform translate-y-[2%]">
+      <div className="w-[85%] max-w-[320px]">
+        <div className="flex mb-3 justify-start">
+          <TelemLogo className="h-8" />
+        </div>
+        
         <Card className="shadow-lg border-0">
           <CardHeader className="py-3 px-4">
             <CardTitle className="text-lg font-semibold text-center">{t("login.title")}</CardTitle>
