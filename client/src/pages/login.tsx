@@ -53,38 +53,38 @@ export default function Login() {
   };
 
   return (
-    <div className={`min-h-screen bg-gray-100 flex flex-col justify-center items-center p-4 ${isRtl ? "text-right" : "text-left"}`}>
-      <div className="w-full max-w-md">
-        <div className="flex justify-center mb-6">
-          <TelemLogo className="h-16" />
+    <div className={`h-screen bg-gray-100 flex flex-col justify-center items-center py-2 px-4 ${isRtl ? "text-right" : "text-left"}`}>
+      <div className="w-full max-w-sm flex flex-col" style={{ maxHeight: '90vh' }}>
+        <div className="flex justify-center mb-3">
+          <TelemLogo className="h-12" />
         </div>
         
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">{t("login.title")}</CardTitle>
-            <CardDescription className="text-center">
+        <Card className="overflow-hidden flex-shrink shadow-md">
+          <CardHeader className="py-3">
+            <CardTitle className="text-lg font-bold text-center">{t("login.title")}</CardTitle>
+            <CardDescription className="text-center text-xs">
               {t("login.welcomeMessage")}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="py-2 px-4">
             {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
+              <Alert variant="destructive" className="mb-2 py-1">
+                <AlertDescription className="text-xs">{error}</AlertDescription>
               </Alert>
             )}
             
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
                 <FormField
                   control={form.control}
                   name="username"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("common.username")}</FormLabel>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs">{t("common.username")}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t("common.username")} {...field} />
+                        <Input placeholder={t("common.username")} {...field} className="h-8 text-sm" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -93,25 +93,25 @@ export default function Login() {
                   control={form.control}
                   name="password"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("common.password")}</FormLabel>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs">{t("common.password")}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder={t("common.password")} {...field} />
+                        <Input type="password" placeholder={t("common.password")} {...field} className="h-8 text-sm" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-teal-500 hover:bg-teal-600" 
+                  className="w-full bg-teal-500 hover:bg-teal-600 h-8 mt-1 text-sm" 
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                      {t("login.loggingIn")}
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                      <span className="text-xs">{t("login.loggingIn")}</span>
                     </div>
                   ) : (
                     t("common.login")
@@ -120,8 +120,8 @@ export default function Login() {
               </form>
             </Form>
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <p className="text-sm text-gray-500">
+          <CardFooter className="flex justify-center py-2">
+            <p className="text-xs text-gray-500">
               {t("login.contactAdmin")}
             </p>
           </CardFooter>
