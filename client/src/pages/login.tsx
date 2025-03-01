@@ -57,13 +57,18 @@ export default function Login() {
       className={`min-h-[100dvh] bg-gray-100 flex items-center justify-center p-0 m-0 ${isRtl ? "text-right" : "text-left"}`}
       style={{ height: 'calc(var(--vh, 1vh) * 100)' }}  
     >
-      <div className="w-[85%] max-w-[320px]">
-        <div className="flex mb-3 justify-start">
-          <TelemLogo className="h-8" />
+      <div className="flex flex-row items-start justify-center gap-3 w-[90%] max-w-[620px]">
+        <div className="hidden md:flex justify-end items-start self-start h-full" style={{ width: "40%" }}>
+          <TelemLogo className="w-full max-w-[200px]" width="100%" />
         </div>
         
-        <Card className="shadow-lg border-0">
-          <CardHeader className="py-3 px-4">
+        <div className="w-[90%] md:w-[60%] max-w-[320px]">
+          <div className="flex md:hidden mb-3 justify-start">
+            <TelemLogo className="h-10" />
+          </div>
+          
+          <Card className="shadow-lg border-0">
+            <CardHeader className="py-3 px-4">
             <CardTitle className="text-lg font-semibold text-center">{t("login.title")}</CardTitle>
             <CardDescription className="text-center text-xs mt-1">
               {t("login.welcomeMessage")}
@@ -128,7 +133,8 @@ export default function Login() {
               {t("login.contactAdmin")}
             </p>
           </CardFooter>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );
