@@ -37,7 +37,7 @@ export default function Login() {
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const success = await login(values.username, values.password);
       if (success) {
@@ -53,12 +53,12 @@ export default function Login() {
   };
 
   return (
-    <div className={`h-screen bg-gray-100 flex flex-col justify-center items-center py-2 px-4 ${isRtl ? "text-right" : "text-left"}`}>
-      <div className="w-full max-w-sm flex flex-col" style={{ maxHeight: '90vh' }}>
+    <div className={`auth-container h-screen bg-gray-100 flex flex-col justify-center items-center py-2 px-4 ${isRtl ? "text-right" : "text-left"}`}>
+      <div className="auth-card w-full max-w-sm flex flex-col" style={{ maxHeight: '90vh' }}>
         <div className="flex justify-center mb-3">
-          <TelemLogo className="h-12" />
+          <TelemLogo className="auth-logo h-12" />
         </div>
-        
+
         <Card className="overflow-hidden flex-shrink shadow-md">
           <CardHeader className="py-3">
             <CardTitle className="text-lg font-bold text-center">{t("login.title")}</CardTitle>
@@ -72,7 +72,7 @@ export default function Login() {
                 <AlertDescription className="text-xs">{error}</AlertDescription>
               </Alert>
             )}
-            
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
                 <FormField
@@ -82,13 +82,13 @@ export default function Login() {
                     <FormItem className="space-y-1">
                       <FormLabel className="text-xs">{t("common.username")}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t("common.username")} {...field} className="h-8 text-sm" />
+                        <Input placeholder={t("common.username")} {...field} className="h-8 text-sm auth-input" />
                       </FormControl>
                       <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="password"
@@ -96,16 +96,16 @@ export default function Login() {
                     <FormItem className="space-y-1">
                       <FormLabel className="text-xs">{t("common.password")}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder={t("common.password")} {...field} className="h-8 text-sm" />
+                        <Input type="password" placeholder={t("common.password")} {...field} className="h-8 text-sm auth-input" />
                       </FormControl>
                       <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
-                
-                <Button 
-                  type="submit" 
-                  className="w-full bg-teal-500 hover:bg-teal-600 h-8 mt-1 text-sm" 
+
+                <Button
+                  type="submit"
+                  className="w-full bg-teal-500 hover:bg-teal-600 h-8 mt-1 text-sm auth-button"
                   disabled={isLoading}
                 >
                   {isLoading ? (

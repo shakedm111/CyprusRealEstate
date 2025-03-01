@@ -122,22 +122,22 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Dashboard Header Section */}
         <div className="lg:col-span-3">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white rounded-lg p-6 shadow-sm">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white rounded-lg p-6 shadow-sm border border-gray-100">
             <div>
               <h2 className="text-2xl font-bold text-gray-800">
                 {t("common.welcomeMessage")}, {user?.name}
               </h2>
-              <p className="text-gray-600 mt-1">{getCurrentDate()}</p>
+              <p className="text-gray-500 mt-1">{getCurrentDate()}</p>
             </div>
-            <div className="mt-4 md:mt-0 flex space-x-2 space-x-reverse">
+            <div className="mt-4 md:mt-0 flex space-x-3 space-x-reverse">
               <Button 
                 onClick={() => setNewCalculatorModalOpen(true)}
-                className="bg-teal-500 hover:bg-teal-600 text-white"
+                className="bg-primary hover:bg-primary/90 text-white font-medium shadow-sm"
               >
                 <i className="fas fa-plus mr-2"></i>
                 <span>{t("common.newCalculator")}</span>
               </Button>
-              <Button variant="outline" className="border border-gray-300">
+              <Button variant="outline" className="border border-gray-200 hover:bg-gray-50 text-gray-700">
                 <i className="fas fa-download mr-2"></i>
                 <span>{t("common.exportReport")}</span>
               </Button>
@@ -149,22 +149,22 @@ export default function Dashboard() {
         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             icon="calculator"
-            iconColor="text-blue-500"
-            iconBgColor="bg-blue-100"
+            iconColor="text-primary"
+            iconBgColor="bg-primary/10"
             title={t("common.activeCalculators")}
             value={data.stats.activeCalculators}
           />
           <StatCard
             icon="users"
-            iconColor="text-green-500"
-            iconBgColor="bg-green-100"
+            iconColor="text-purple-600"
+            iconBgColor="bg-purple-100"
             title={t("common.activeInvestors")}
             value={data.stats.investorCount}
           />
           <StatCard
             icon="building"
-            iconColor="text-purple-500"
-            iconBgColor="bg-purple-100"
+            iconColor="text-blue-500"
+            iconBgColor="bg-blue-100"
             title={t("common.propertiesInAnalysis")}
             value={data.stats.propertyCount}
           />
@@ -257,7 +257,7 @@ export default function Dashboard() {
 
             <div className="flex justify-center mt-4 space-x-6 space-x-reverse">
               <div className="flex items-center">
-                <div className="w-3 h-3 bg-teal-500 rounded-full mr-2"></div>
+                <div className="w-3 h-3 bg-primary rounded-full mr-2"></div>
                 <span className="text-sm text-gray-600">{t("common.yieldFromApartments")}</span>
               </div>
               <div className="flex items-center">
