@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import TelemLogo from "@/lib/telemLogo";
+import TelemLogo from "../lib/telemLogo";
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "Username is required" }),
