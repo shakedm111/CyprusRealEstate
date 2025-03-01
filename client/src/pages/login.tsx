@@ -37,7 +37,7 @@ export default function Login() {
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
     setError(null);
-
+    
     try {
       const success = await login(values.username, values.password);
       if (success) {
@@ -69,46 +69,46 @@ export default function Login() {
               {t("login.welcomeMessage")}
             </CardDescription>
           </CardHeader>
-          <CardContent className="py-2 px-4">
+          <CardContent className="pt-0 pb-2 px-5">
             {error && (
-              <Alert variant="destructive" className="mb-2 py-1">
-                <AlertDescription className="text-xs">{error}</AlertDescription>
+              <Alert variant="destructive" className="mb-2 py-1 text-xs">
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
+            
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
                 <FormField
                   control={form.control}
                   name="username"
                   render={({ field }) => (
                     <FormItem className="space-y-1">
-                      <FormLabel className="text-xs">{t("common.username")}</FormLabel>
+                      <FormLabel className="text-xs font-medium">{t("common.username")}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t("common.username")} {...field} className="h-8 text-sm auth-input" />
+                        <Input placeholder={t("common.username")} {...field} className="h-8 text-sm" />
                       </FormControl>
-                      <FormMessage className="text-xs" />
+                      <FormMessage className="text-[10px]" />
                     </FormItem>
                   )}
                 />
-
+                
                 <FormField
                   control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem className="space-y-1">
-                      <FormLabel className="text-xs">{t("common.password")}</FormLabel>
+                      <FormLabel className="text-xs font-medium">{t("common.password")}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder={t("common.password")} {...field} className="h-8 text-sm auth-input" />
+                        <Input type="password" placeholder={t("common.password")} {...field} className="h-8 text-sm" />
                       </FormControl>
-                      <FormMessage className="text-xs" />
+                      <FormMessage className="text-[10px]" />
                     </FormItem>
                   )}
                 />
-
-                <Button
-                  type="submit"
-                  className="w-full bg-teal-500 hover:bg-teal-600 h-8 mt-1 text-sm auth-button"
+                
+                <Button 
+                  type="submit" 
+                  className="w-full bg-teal-500 hover:bg-teal-600 h-8 text-sm mt-2" 
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -123,8 +123,8 @@ export default function Login() {
               </form>
             </Form>
           </CardContent>
-          <CardFooter className="flex justify-center py-2">
-            <p className="text-xs text-gray-500">
+          <CardFooter className="flex justify-center pt-0 pb-3 px-4">
+            <p className="text-[10px] text-gray-500">
               {t("login.contactAdmin")}
             </p>
           </CardFooter>
