@@ -4,6 +4,7 @@ import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Calculators from "@/pages/calculators";
+import PropertyCalculator from "@/pages/property-calculator";
 import Properties from "@/pages/properties";
 import Investors from "@/pages/investors";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -32,6 +33,7 @@ const AppContent = () => {
             <Route path="/" component={Dashboard} />
             <Route path="/dashboard" component={Dashboard} />
             <Route path="/calculators" component={Calculators} />
+            <Route path="/calculators/property" component={PropertyCalculator} />
             <Route path="/properties" component={Properties} />
             <Route path="/investors" component={Investors} />
           </>

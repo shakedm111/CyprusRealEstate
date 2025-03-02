@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -56,6 +57,7 @@ export default function Calculators() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [newCalculatorModalOpen, setNewCalculatorModalOpen] = useState(false);
   const [calculatorToDelete, setCalculatorToDelete] = useState<number | null>(null);
@@ -254,6 +256,44 @@ export default function Calculators() {
                 </Button>
               </div>
             )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("property.calculationTools")}</CardTitle>
+            <CardDescription>
+              {t("property.calculationToolsDescription") || "כלי חישוב מובנים לניתוח נדל\"ן"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button 
+                onClick={() => setLocation("/calculators/property")}
+                className="bg-teal-500 hover:bg-teal-600 text-white flex items-center justify-center py-6"
+              >
+                <i className="fas fa-home mr-2"></i>
+                <span>{t("property.calculator") || "מחשבון נכסים"}</span>
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="text-gray-600 flex items-center justify-center py-6 opacity-60 cursor-not-allowed"
+                disabled
+              >
+                <i className="fas fa-chart-line mr-2"></i>
+                <span>{t("common.comingSoon") || "בקרוב"}</span>
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="text-gray-600 flex items-center justify-center py-6 opacity-60 cursor-not-allowed"
+                disabled
+              >
+                <i className="fas fa-chart-pie mr-2"></i>
+                <span>{t("common.comingSoon") || "בקרוב"}</span>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
