@@ -41,18 +41,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
+        console.log(`Attempting login for user: ${username}`);
         const user = await storage.getUserByUsername(username);
+        
         if (!user) {
+          console.log(`User not found: ${username}`);
           return done(null, false, { message: "Incorrect username." });
         }
-
+        
+        console.log(`User found, validating password`);
+        console.log(`Stored password hash: ${user.password.substring(0, 15)}...`);
+        
         const isValid = await compare(password, user.password);
+        console.log(`Password validation result: ${isValid}`);
+        
         if (!isValid) {
           return done(null, false, { message: "Incorrect password." });
         }
 
         return done(null, user);
       } catch (err) {
+        console.error("Authentication error:", err);
         return done(err);
       }
     })
@@ -87,20 +96,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Auth routes
-  app.post("/api/auth/login", passport.authenticate("local"), (req, res) => {
-    const user = req.user as any;
-    // Update last login
-    storage.updateUserLastLogin(user.id);
-    res.json({ 
-      success: true, 
-      user: { 
-        id: user.id, 
-        username: user.username, 
-        name: user.name, 
-        email: user.email, 
-        role: user.role 
-      } 
-    });
+  app.post("/api/auth/login", (req, res, next) => {
+    passport.authenticate("local", (err: any, user: any, info: any) => {
+      if (err) {
+        console.error("Authentication error:", err);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+      }
+      
+      if (!user) {
+        console.error("Authentication failed:", info);
+        return res.status(401).json({ success: false, message: info?.message || "Authentication failed" });
+      }
+      
+      req.login(user, (loginErr) => {
+        if (loginErr) {
+          console.error("Login error:", loginErr);
+          return res.status(500).json({ success: false, message: "Failed to establish session" });
+        }
+        
+        // Update last login
+        storage.updateUserLastLogin(user.id);
+        
+        return res.json({ 
+          success: true, 
+          user: { 
+            id: user.id, 
+            username: user.username, 
+            name: user.name, 
+            email: user.email, 
+            role: user.role 
+          } 
+        });
+      });
+    })(req, res, next);
   });
 
   app.post("/api/auth/logout", (req, res) => {
