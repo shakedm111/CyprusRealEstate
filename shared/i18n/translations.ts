@@ -56,7 +56,13 @@ export const translations = {
       no: "לא",
       username: "שם משתמש",
       password: "סיסמה",
-      login: "כניסה"
+      login: "כניסה",
+      activity: {
+        justNow: "עכשיו",
+        minutesAgo: "דקות",
+        hoursAgo: "שעות",
+        daysAgo: "ימים"
+      }
     },
     calculator: {
       create: "יצירת מחשבון חדש",
@@ -160,7 +166,13 @@ export const translations = {
       no: "No",
       username: "Username",
       password: "Password",
-      login: "Login"
+      login: "Login",
+      activity: {
+        justNow: "Just now",
+        minutesAgo: "minutes ago",
+        hoursAgo: "hours ago",
+        daysAgo: "days ago"
+      }
     },
     calculator: {
       create: "Create New Calculator",

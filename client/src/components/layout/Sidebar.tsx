@@ -26,16 +26,15 @@ export const Sidebar = () => {
           <ul>
             {menuItems.map((item) => (
               <li key={item.href}>
-                <Link href={item.href}>
-                  <a 
-                    className={`flex items-center py-3 px-4 hover:bg-gray-50 transition-colors
-                      ${location === item.href 
-                        ? 'text-teal-500 border-r-4 border-teal-500' 
-                        : 'text-gray-600 hover:text-teal-500'}`}
-                  >
-                    <i className={`fas fa-${item.icon} text-lg w-6`} />
-                    <span className="ml-2 hidden md:block">{item.label}</span>
-                  </a>
+                <Link 
+                  href={item.href}
+                  className={`flex items-center py-3 px-4 hover:bg-gray-50 transition-colors
+                    ${location === item.href 
+                      ? 'text-teal-500 border-r-4 border-teal-500' 
+                      : 'text-gray-600 hover:text-teal-500'}`}
+                >
+                  <i className={`fas fa-${item.icon} text-lg w-6`} />
+                  <span className="ml-2 hidden md:block">{item.label}</span>
                 </Link>
               </li>
             ))}
