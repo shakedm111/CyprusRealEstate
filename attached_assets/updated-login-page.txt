@@ -1,0 +1,153 @@
+// client/src/pages/login.tsx
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import axios from 'axios';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import Image from 'next/image';
+
+export default function LoginPage() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  // בדיקה אם המשתמש כבר מחובר
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          
+          // הפניה לדף המתאים לפי תפקיד המשתמש
+          if (user.role === 'advisor') {
+            router.push('/dashboard/admin');
+          } else {
+            router.push('/dashboard/investor');
+          }
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          // ניקוי נתוני משתמש פגומים
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user');
+        }
+      }
+    }
+  }, [router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      // שליחת בקשת התחברות לשרת
+      const response = await axios.post('/api/login', { username, password });
+      
+      // שמירת הטוקן בלוקל סטורג'
+      localStorage.setItem('auth_token', response.data.token);
+      
+      // שמירת פרטי המשתמש
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      // הפניה לדף המתאים לפי תפקיד המשתמש
+      if (response.data.user.role === 'advisor') {
+        router.push('/dashboard/admin');
+      } else {
+        router.push('/dashboard/investor');
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      
+      // טיפול בשגיאות שונות
+      if (error.response) {
+        // שגיאה מהשרת עם קוד תגובה
+        setError(error.response.data.error || 'שם משתמש או סיסמה שגויים');
+      } else if (error.request) {
+        // לא התקבלה תגובה מהשרת
+        setError('השרת אינו זמין, אנא נסה שוב מאוחר יותר');
+      } else {
+        // שגיאה אחרת
+        setError('אירעה שגיאה בעת ההתחברות');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <Card className="w-[350px] shadow-lg">
+        <CardHeader className="space-y-1 flex flex-col items-center">
+          <div className="mb-4">
+            <Image 
+              src="/client/public/telem-logo.png" 
+              alt="תלם נדל״ן" 
+              width={120} 
+              height={40} 
+              onError={(e: any) => {
+                e.target.onerror = null;
+                e.target.src = '/client/public/logo.png';
+              }}
+            />
+          </div>
+          <CardTitle className="text-xl text-center">התחברות למערכת</CardTitle>
+          <CardDescription className="text-center">
+            מחשבון השקעות נדל״ן בקפריסין
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="username">שם משתמש</Label>
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                autoComplete="username"
+                placeholder="הזן שם משתמש"
+                dir="rtl"
+                className="text-right"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">סיסמה</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                placeholder="הזן סיסמה"
+                dir="rtl"
+                className="text-right"
+              />
+            </div>
+            <Button type="submit" className="w-full bg-[#42b0a6] hover:bg-[#3a9e99]" disabled={isLoading}>
+              {isLoading ? 'מתחבר...' : 'כניסה למערכת'}
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col">
+          <div className="text-center text-sm text-gray-500 w-full">
+            תלם נדל״ן &copy; {new Date().getFullYear()}
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}

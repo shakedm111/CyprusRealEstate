@@ -708,7 +708,7 @@ export class MemStorage implements IStorage {
     // Add a sample admin user
     this.createUser({
       username: "admin",
-      password: "$2b$10$2dQm5Qd3IzW.aBo82ycfQuMfVrL5ZGiL2TOk3tzRFwDdJ/sRKi0Cq", // password: admin123
+      password: "$2a$10$7JfHbXFpxRXcZ9GHnerTkO17M6HuZHzLSxLryQ9guEVNEUtJNl4Yy", // password: admin123
       email: "admin@telemnadlan.com",
       phone: "+972 50-000-0000",
       name: "System Admin",
@@ -723,7 +723,7 @@ export class MemStorage implements IStorage {
     // Add a sample advisor
     this.createUser({
       username: "daniel",
-      password: "$2b$10$2dQm5Qd3IzW.aBo82ycfQuMfVrL5ZGiL2TOk3tzRFwDdJ/sRKi0Cq", // password: admin123
+      password: "$2a$10$7JfHbXFpxRXcZ9GHnerTkO17M6HuZHzLSxLryQ9guEVNEUtJNl4Yy", // password: admin123
       email: "daniel@telemnadlan.com",
       phone: "+972 50-111-1111",
       name: "דניאל",

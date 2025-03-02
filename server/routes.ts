@@ -1,11 +1,7 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { hash, compare } from "./utils";
-import session from "express-session";
-import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-import MemoryStore from "memorystore";
 import { z } from "zod";
 import {
   insertUserSchema,
@@ -15,69 +11,15 @@ import {
   insertMortgageScenarioSchema,
   insertNotificationSchema,
 } from "@shared/schema";
-
-// Create memory store for sessions
-const MemoryStoreSession = MemoryStore(session);
+import authService, { authenticateToken, isAdvisor } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup session
-  app.use(
-    session({
-      secret: process.env.SESSION_SECRET || "telem-nadlan-secret",
-      resave: false,
-      saveUninitialized: false,
-      cookie: { secure: process.env.NODE_ENV === "production", maxAge: 24 * 60 * 60 * 1000 }, // 24 hours
-      store: new MemoryStoreSession({
-        checkPeriod: 86400000, // prune expired entries every 24h
-      }),
-    })
-  );
+  // Call authService.createInitialUsers at startup
+  await authService.createInitialUsers();
 
-  // Initialize passport
-  app.use(passport.initialize());
-  app.use(passport.session());
-
-  // Configure passport
-  passport.use(
-    new LocalStrategy(async (username, password, done) => {
-      try {
-        console.log(`Attempting login for user: ${username}`);
-        const user = await storage.getUserByUsername(username);
-        
-        if (!user) {
-          console.log(`User not found: ${username}`);
-          return done(null, false, { message: "Incorrect username." });
-        }
-        
-        console.log(`User found, validating password`);
-        console.log(`Stored password hash: ${user.password.substring(0, 15)}...`);
-        
-        const isValid = await compare(password, user.password);
-        console.log(`Password validation result: ${isValid}`);
-        
-        if (!isValid) {
-          return done(null, false, { message: "Incorrect password." });
-        }
-
-        return done(null, user);
-      } catch (err) {
-        console.error("Authentication error:", err);
-        return done(err);
-      }
-    })
-  );
-
-  passport.serializeUser((user: any, done) => {
-    done(null, user.id);
-  });
-
-  passport.deserializeUser(async (id: number, done) => {
-    try {
-      const user = await storage.getUser(id);
-      done(null, user);
-    } catch (err) {
-      done(err);
-    }
+  // Register JWT API endpoints
+  app.post("/api/auth/login", (req, res) => {
+    authService.login(req, res);
   });
 
   // Auth middleware
