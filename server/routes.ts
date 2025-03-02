@@ -42,7 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Note: Old Passport-based auth routes have been replaced with JWT routes above
 
   // User routes
-  app.get("/api/users", isAdvisor, async (req, res) => {
+  app.get("/api/users", authenticateToken, isAdvisor, async (req, res) => {
     const users = await storage.getUsers();
     res.json(users);
   });
@@ -197,7 +197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(property);
   });
 
-  app.post("/api/properties", isAdvisor, async (req, res) => {
+  app.post("/api/properties", authenticateToken, isAdvisor, async (req, res) => {
     try {
       const propertyData = insertPropertySchema.parse(req.body);
       const property = await storage.createProperty({
@@ -213,7 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/properties/:id", isAdvisor, async (req, res) => {
+  app.put("/api/properties/:id", authenticateToken, isAdvisor, async (req, res) => {
     try {
       const propertyId = parseInt(req.params.id);
       const property = await storage.getProperty(propertyId);
@@ -237,7 +237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/properties/:id", isAdvisor, async (req, res) => {
+  app.delete("/api/properties/:id", authenticateToken, isAdvisor, async (req, res) => {
     try {
       const propertyId = parseInt(req.params.id);
       const property = await storage.getProperty(propertyId);
@@ -384,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(notifications);
   });
 
-  app.post("/api/notifications", isAdvisor, async (req, res) => {
+  app.post("/api/notifications", authenticateToken, isAdvisor, async (req, res) => {
     try {
       const notificationData = insertNotificationSchema.parse(req.body);
       const notification = await storage.createNotification({
@@ -465,7 +465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(setting);
   });
 
-  app.put("/api/system-settings/:key", isAdvisor, async (req, res) => {
+  app.put("/api/system-settings/:key", authenticateToken, isAdvisor, async (req, res) => {
     try {
       const key = req.params.key;
       const { value } = req.body;
