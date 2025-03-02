@@ -84,6 +84,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     },
     onSuccess: (data) => {
       if (data.success) {
+        // שמירת הטוקן ב-localStorage
+        localStorage.setItem('auth_token', data.token);
+        
         setUser(data.user);
         toast({
           title: "Login successful",
@@ -104,8 +107,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/auth/logout", {});
-      return await res.json();
+      // מחיקת הטוקן מ-localStorage
+      localStorage.removeItem('auth_token');
+      
+      // קריאה סטטית לשרת (לא נדרשת עם JWT סטטלס)
+      // ניתן להסיר בעתיד לחלוטין כאשר נתאים את כל המערכת
+      return { success: true };
     },
     onSuccess: () => {
       setUser(null);
