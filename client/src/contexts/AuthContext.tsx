@@ -25,6 +25,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
+  // Get token from localStorage
+  const getToken = () => localStorage.getItem('auth_token');
+  
   // Query to fetch the current user
   const { data, isLoading, error } = useQuery({
     queryKey: ["/api/auth/current-user"],
@@ -35,11 +38,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // If we get a 401, return null instead of throwing an error
     queryFn: async ({ queryKey }) => {
       try {
+        const token = getToken();
+        
+        if (!token) {
+          return null;
+        }
+        
         const res = await fetch(queryKey[0] as string, {
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
         
         if (res.status === 401) {
+          localStorage.removeItem('auth_token');
           return null;
         }
         

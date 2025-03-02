@@ -22,76 +22,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     authService.login(req, res);
   });
 
-  // Auth middleware
-  const isAuthenticated = (req: Request, res: Response, next: any) => {
-    if (req.isAuthenticated()) {
-      return next();
-    }
-    res.status(401).json({ message: "Unauthorized" });
-  };
-
-  const isAdvisor = (req: Request, res: Response, next: any) => {
-    if (req.isAuthenticated() && (req.user as any)?.role === "advisor") {
-      return next();
-    }
-    res.status(403).json({ message: "Forbidden" });
-  };
-
-  // Auth routes
-  app.post("/api/auth/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: any, info: any) => {
-      if (err) {
-        console.error("Authentication error:", err);
-        return res.status(500).json({ success: false, message: "Internal server error" });
-      }
-      
-      if (!user) {
-        console.error("Authentication failed:", info);
-        return res.status(401).json({ success: false, message: info?.message || "Authentication failed" });
-      }
-      
-      req.login(user, (loginErr) => {
-        if (loginErr) {
-          console.error("Login error:", loginErr);
-          return res.status(500).json({ success: false, message: "Failed to establish session" });
-        }
-        
-        // Update last login
-        storage.updateUserLastLogin(user.id);
-        
-        return res.json({ 
-          success: true, 
-          user: { 
-            id: user.id, 
-            username: user.username, 
-            name: user.name, 
-            email: user.email, 
-            role: user.role 
-          } 
-        });
-      });
-    })(req, res, next);
+  // Add JWT current user endpoint
+  app.get("/api/auth/current-user", authenticateToken, (req, res) => {
+    const user = (req as any).user;
+    res.json({
+      id: user.userId,
+      username: user.username,
+      name: user.name,
+      role: user.role
+    });
   });
-
+  
+  // Add JWT logout endpoint
   app.post("/api/auth/logout", (req, res) => {
-    req.logout(() => {
-      res.json({ success: true });
-    });
+    // JWT is stateless, so just tell client to remove token
+    res.json({ success: true, message: "Logout successful" });
   });
 
-  app.get("/api/auth/current-user", (req, res) => {
-    if (!req.user) {
-      return res.status(401).json({ message: "Not logged in" });
-    }
-    const user = req.user as any;
-    res.json({ 
-      id: user.id, 
-      username: user.username, 
-      name: user.name, 
-      email: user.email, 
-      role: user.role 
-    });
-  });
+  // Note: Old Passport-based auth routes have been replaced with JWT routes above
 
   // User routes
   app.get("/api/users", isAdvisor, async (req, res) => {
@@ -99,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(users);
   });
 
-  app.get("/api/users/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/users/:id", authenticateToken, async (req, res) => {
     const user = await storage.getUser(parseInt(req.params.id));
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -126,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Calculator routes
-  app.get("/api/calculators", isAuthenticated, async (req, res) => {
+  app.get("/api/calculators", authenticateToken, async (req, res) => {
     const user = req.user as any;
     let calculators;
     
@@ -141,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(calculators);
   });
 
-  app.get("/api/calculators/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/calculators/:id", authenticateToken, async (req, res) => {
     const user = req.user as any;
     const calculator = await storage.getCalculator(parseInt(req.params.id));
     
@@ -157,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(calculator);
   });
 
-  app.post("/api/calculators", isAuthenticated, async (req, res) => {
+  app.post("/api/calculators", authenticateToken, async (req, res) => {
     try {
       const calculatorData = insertCalculatorSchema.parse(req.body);
       const user = req.user as any;
@@ -176,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/calculators/:id", isAuthenticated, async (req, res) => {
+  app.put("/api/calculators/:id", authenticateToken, async (req, res) => {
     try {
       const user = req.user as any;
       const calculatorId = parseInt(req.params.id);
@@ -206,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/calculators/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/calculators/:id", authenticateToken, async (req, res) => {
     try {
       const user = req.user as any;
       const calculatorId = parseInt(req.params.id);
@@ -229,12 +177,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Property routes
-  app.get("/api/properties", isAuthenticated, async (req, res) => {
+  app.get("/api/properties", authenticateToken, async (req, res) => {
     const properties = await storage.getProperties();
     res.json(properties);
   });
 
-  app.get("/api/properties/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/properties/:id", authenticateToken, async (req, res) => {
     const property = await storage.getProperty(parseInt(req.params.id));
     if (!property) {
       return res.status(404).json({ message: "Property not found" });
@@ -299,7 +247,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Investment routes
-  app.get("/api/investments", isAuthenticated, async (req, res) => {
+  app.get("/api/investments", authenticateToken, async (req, res) => {
     const user = req.user as any;
     let investments;
     
@@ -312,7 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(investments);
   });
 
-  app.get("/api/investments/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/investments/:id", authenticateToken, async (req, res) => {
     const investment = await storage.getInvestment(parseInt(req.params.id));
     
     if (!investment) {
@@ -330,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(investment);
   });
 
-  app.post("/api/investments", isAuthenticated, async (req, res) => {
+  app.post("/api/investments", authenticateToken, async (req, res) => {
     try {
       const investmentData = insertInvestmentSchema.parse(req.body);
       const user = req.user as any;
@@ -361,7 +309,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mortgage scenario routes
-  app.get("/api/mortgage-scenarios", isAuthenticated, async (req, res) => {
+  app.get("/api/mortgage-scenarios", authenticateToken, async (req, res) => {
     const user = req.user as any;
     let scenarios;
     
@@ -374,7 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(scenarios);
   });
 
-  app.get("/api/mortgage-scenarios/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/mortgage-scenarios/:id", authenticateToken, async (req, res) => {
     const scenario = await storage.getMortgageScenario(parseInt(req.params.id));
     
     if (!scenario) {
@@ -392,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(scenario);
   });
 
-  app.post("/api/mortgage-scenarios", isAuthenticated, async (req, res) => {
+  app.post("/api/mortgage-scenarios", authenticateToken, async (req, res) => {
     try {
       const scenarioData = insertMortgageScenarioSchema.parse(req.body);
       const user = req.user as any;
@@ -423,7 +371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Notification routes
-  app.get("/api/notifications", isAuthenticated, async (req, res) => {
+  app.get("/api/notifications", authenticateToken, async (req, res) => {
     const user = req.user as any;
     const notifications = await storage.getUserNotifications(user.id);
     res.json(notifications);
@@ -444,7 +392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/notifications/:id/read", isAuthenticated, async (req, res) => {
+  app.put("/api/notifications/:id/read", authenticateToken, async (req, res) => {
     try {
       const notificationId = parseInt(req.params.id);
       const user = req.user as any;
@@ -466,7 +414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/notifications/mark-all-read", isAuthenticated, async (req, res) => {
+  app.put("/api/notifications/mark-all-read", authenticateToken, async (req, res) => {
     try {
       const user = req.user as any;
       await storage.markAllNotificationsAsRead(user.id);
@@ -477,7 +425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard data
-  app.get("/api/dashboard", isAuthenticated, async (req, res) => {
+  app.get("/api/dashboard", authenticateToken, async (req, res) => {
     try {
       const user = req.user as any;
       let dashboardData;
@@ -495,12 +443,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // System settings routes
-  app.get("/api/system-settings", isAuthenticated, async (req, res) => {
+  app.get("/api/system-settings", authenticateToken, async (req, res) => {
     const settings = await storage.getSystemSettings();
     res.json(settings);
   });
 
-  app.get("/api/system-settings/:key", isAuthenticated, async (req, res) => {
+  app.get("/api/system-settings/:key", authenticateToken, async (req, res) => {
     const setting = await storage.getSystemSettingByKey(req.params.key);
     
     if (!setting) {
