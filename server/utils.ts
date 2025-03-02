@@ -1,26 +1,14 @@
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
-// Simple password hashing and verification functions
+// Password hashing and verification functions using bcrypt
 export async function hash(password: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // In a real application, use bcrypt or Argon2
-    // This is a simple implementation for demonstration purposes
-    const salt = crypto.randomBytes(16).toString('hex');
-    crypto.pbkdf2(password, salt, 1000, 64, 'sha512', (err, derivedKey) => {
-      if (err) reject(err);
-      resolve(`${salt}:${derivedKey.toString('hex')}`);
-    });
-  });
+  const saltRounds = 10;
+  return await bcrypt.hash(password, saltRounds);
 }
 
 export async function compare(password: string, hash: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const [salt, key] = hash.split(':');
-    crypto.pbkdf2(password, salt, 1000, 64, 'sha512', (err, derivedKey) => {
-      if (err) reject(err);
-      resolve(key === derivedKey.toString('hex'));
-    });
-  });
+  return await bcrypt.compare(password, hash);
 }
 
 // Format date in Hebrew style
