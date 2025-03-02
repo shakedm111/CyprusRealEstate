@@ -60,12 +60,13 @@ export default function PropertyPriceCalculator() {
   const [exchangeRate, setExchangeRate] = useState<number>(3.9);
 
   // קבלת שער החליפין מהשרת
-  const { data: systemSettings } = useQuery({
+  const { data: systemSettings } = useQuery<any[]>({
     queryKey: ["/api/system-settings"],
+    initialData: [], // תחילה מאתחלים כמערך ריק
   });
 
   useEffect(() => {
-    if (systemSettings) {
+    if (systemSettings && systemSettings.length > 0) {
       const exchangeRateSetting = systemSettings.find((setting: any) => setting.key === "exchange_rate");
       if (exchangeRateSetting) {
         setExchangeRate(parseFloat(exchangeRateSetting.value));

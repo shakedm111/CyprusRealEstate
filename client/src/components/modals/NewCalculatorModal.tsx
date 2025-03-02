@@ -39,6 +39,7 @@ import {
 type Investor = {
   id: number;
   name: string;
+  role: "investor" | "advisor";
 };
 
 // Type for calculator
@@ -58,7 +59,7 @@ type Calculator = {
 // Form validation schema
 const calculatorSchema = z.object({
   name: z.string().min(1, { message: "Calculator name is required" }),
-  userId: z.coerce.number().min(1, { message: "Investor is required" }),
+  userId: z.coerce.number().optional(), // משקיע אופציונלי
   selfEquity: z.coerce.number().positive({ message: "Self equity must be positive" }),
   hasMortgage: z.boolean(),
   hasPropertyInIsrael: z.boolean(),
