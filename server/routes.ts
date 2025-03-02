@@ -32,7 +32,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       role: user.role
     });
   });
-  
+
   // Add JWT logout endpoint
   app.post("/api/auth/logout", (req, res) => {
     // JWT is stateless, so just tell client to remove token
@@ -55,17 +55,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(user);
   });
 
-  app.post("/api/users", isAdvisor, async (req, res) => {
+  app.post("/api/users", authenticateToken, async (req, res) => {
     try {
+      // Check if user is advisor
+      if ((req.user as any).role !== 'advisor') {
+        console.log('User role:', (req.user as any).role);
+        return res.status(403).json({ error: 'אין הרשאות מתאימות לפעולה זו' });
+      }
+
       const userData = insertUserSchema.parse(req.body);
       const hashedPassword = await hash(userData.password);
       const user = await storage.createUser({
         ...userData,
         password: hashedPassword,
-        createdBy: (req.user as any).id
+        createdBy: (req.user as any).userId // Note: using userId from JWT token
       });
       res.status(201).json(user);
     } catch (error) {
+      console.error('Error creating user:', error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ errors: error.errors });
       }
@@ -77,7 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/calculators", authenticateToken, async (req, res) => {
     const user = req.user as any;
     let calculators;
-    
+
     if (user.role === "advisor") {
       // Advisors can see all calculators
       calculators = await storage.getCalculators();
@@ -85,23 +92,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Investors can only see their own calculators
       calculators = await storage.getUserCalculators(user.id);
     }
-    
+
     res.json(calculators);
   });
 
   app.get("/api/calculators/:id", authenticateToken, async (req, res) => {
     const user = req.user as any;
     const calculator = await storage.getCalculator(parseInt(req.params.id));
-    
+
     if (!calculator) {
       return res.status(404).json({ message: "Calculator not found" });
     }
-    
+
     // Ensure user has access to this calculator
     if (user.role !== "advisor" && calculator.userId !== user.id) {
       return res.status(403).json({ message: "Forbidden" });
     }
-    
+
     res.json(calculator);
   });
 
@@ -109,12 +116,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const calculatorData = insertCalculatorSchema.parse(req.body);
       const user = req.user as any;
-      
+
       const calculator = await storage.createCalculator({
         ...calculatorData,
         createdBy: user.id
       });
-      
+
       res.status(201).json(calculator);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -129,22 +136,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       const calculatorId = parseInt(req.params.id);
       const calculator = await storage.getCalculator(calculatorId);
-      
+
       if (!calculator) {
         return res.status(404).json({ message: "Calculator not found" });
       }
-      
+
       // Ensure user has access to update this calculator
       if (user.role !== "advisor" && calculator.userId !== user.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
-      
+
       const calculatorData = insertCalculatorSchema.parse(req.body);
       const updatedCalculator = await storage.updateCalculator(calculatorId, {
         ...calculatorData,
         updatedBy: user.id
       });
-      
+
       res.json(updatedCalculator);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -159,16 +166,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user as any;
       const calculatorId = parseInt(req.params.id);
       const calculator = await storage.getCalculator(calculatorId);
-      
+
       if (!calculator) {
         return res.status(404).json({ message: "Calculator not found" });
       }
-      
+
       // Only advisors or the owner can delete calculators
       if (user.role !== "advisor" && calculator.userId !== user.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
-      
+
       await storage.deleteCalculator(calculatorId);
       res.json({ success: true });
     } catch (error) {
@@ -210,17 +217,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const propertyId = parseInt(req.params.id);
       const property = await storage.getProperty(propertyId);
-      
+
       if (!property) {
         return res.status(404).json({ message: "Property not found" });
       }
-      
+
       const propertyData = insertPropertySchema.parse(req.body);
       const updatedProperty = await storage.updateProperty(propertyId, {
         ...propertyData,
         updatedBy: (req.user as any).id
       });
-      
+
       res.json(updatedProperty);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -234,11 +241,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const propertyId = parseInt(req.params.id);
       const property = await storage.getProperty(propertyId);
-      
+
       if (!property) {
         return res.status(404).json({ message: "Property not found" });
       }
-      
+
       await storage.deleteProperty(propertyId);
       res.json({ success: true });
     } catch (error) {
@@ -250,31 +257,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/investments", authenticateToken, async (req, res) => {
     const user = req.user as any;
     let investments;
-    
+
     if (user.role === "advisor") {
       investments = await storage.getInvestments();
     } else {
       investments = await storage.getUserInvestments(user.id);
     }
-    
+
     res.json(investments);
   });
 
   app.get("/api/investments/:id", authenticateToken, async (req, res) => {
     const investment = await storage.getInvestment(parseInt(req.params.id));
-    
+
     if (!investment) {
       return res.status(404).json({ message: "Investment not found" });
     }
-    
+
     const user = req.user as any;
     const calculator = await storage.getCalculator(investment.calculatorId);
-    
+
     // Check if user has access to this investment
     if (user.role !== "advisor" && calculator && calculator.userId !== user.id) {
       return res.status(403).json({ message: "Forbidden" });
     }
-    
+
     res.json(investment);
   });
 
@@ -282,23 +289,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const investmentData = insertInvestmentSchema.parse(req.body);
       const user = req.user as any;
-      
+
       // Check if user has access to this calculator
       const calculator = await storage.getCalculator(investmentData.calculatorId);
-      
+
       if (!calculator) {
         return res.status(404).json({ message: "Calculator not found" });
       }
-      
+
       if (user.role !== "advisor" && calculator.userId !== user.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
-      
+
       const investment = await storage.createInvestment({
         ...investmentData,
         createdBy: user.id
       });
-      
+
       res.status(201).json(investment);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -312,31 +319,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/mortgage-scenarios", authenticateToken, async (req, res) => {
     const user = req.user as any;
     let scenarios;
-    
+
     if (user.role === "advisor") {
       scenarios = await storage.getMortgageScenarios();
     } else {
       scenarios = await storage.getUserMortgageScenarios(user.id);
     }
-    
+
     res.json(scenarios);
   });
 
   app.get("/api/mortgage-scenarios/:id", authenticateToken, async (req, res) => {
     const scenario = await storage.getMortgageScenario(parseInt(req.params.id));
-    
+
     if (!scenario) {
       return res.status(404).json({ message: "Mortgage scenario not found" });
     }
-    
+
     const user = req.user as any;
     const calculator = await storage.getCalculator(scenario.calculatorId);
-    
+
     // Check if user has access to this scenario
     if (user.role !== "advisor" && calculator && calculator.userId !== user.id) {
       return res.status(403).json({ message: "Forbidden" });
     }
-    
+
     res.json(scenario);
   });
 
@@ -344,23 +351,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const scenarioData = insertMortgageScenarioSchema.parse(req.body);
       const user = req.user as any;
-      
+
       // Check if user has access to this calculator
       const calculator = await storage.getCalculator(scenarioData.calculatorId);
-      
+
       if (!calculator) {
         return res.status(404).json({ message: "Calculator not found" });
       }
-      
+
       if (user.role !== "advisor" && calculator.userId !== user.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
-      
+
       const scenario = await storage.createMortgageScenario({
         ...scenarioData,
         createdBy: user.id
       });
-      
+
       res.status(201).json(scenario);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -397,16 +404,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const notificationId = parseInt(req.params.id);
       const user = req.user as any;
       const notification = await storage.getNotification(notificationId);
-      
+
       if (!notification) {
         return res.status(404).json({ message: "Notification not found" });
       }
-      
+
       // Only the user who received the notification can mark it as read
       if (notification.userId !== user.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
-      
+
       const updatedNotification = await storage.markNotificationAsRead(notificationId);
       res.json(updatedNotification);
     } catch (error) {
@@ -429,13 +436,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = req.user as any;
       let dashboardData;
-      
+
       if (user.role === "advisor") {
         dashboardData = await storage.getAdvisorDashboardData();
       } else {
         dashboardData = await storage.getInvestorDashboardData(user.id);
       }
-      
+
       res.json(dashboardData);
     } catch (error) {
       res.status(500).json({ message: "Failed to get dashboard data" });
@@ -450,11 +457,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/system-settings/:key", authenticateToken, async (req, res) => {
     const setting = await storage.getSystemSettingByKey(req.params.key);
-    
+
     if (!setting) {
       return res.status(404).json({ message: "Setting not found" });
     }
-    
+
     res.json(setting);
   });
 
@@ -462,17 +469,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const key = req.params.key;
       const { value } = req.body;
-      
+
       if (!value) {
         return res.status(400).json({ message: "Value is required" });
       }
-      
+
       const updatedSetting = await storage.updateSystemSetting(key, value, (req.user as any).id);
-      
+
       if (!updatedSetting) {
         return res.status(404).json({ message: "Setting not found" });
       }
-      
+
       res.json(updatedSetting);
     } catch (error) {
       res.status(500).json({ message: "Failed to update setting" });

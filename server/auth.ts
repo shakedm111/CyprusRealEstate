@@ -137,9 +137,14 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
  * בדיקה אם המשתמש הוא יועץ
  */
 export function isAdvisor(req: Request, res: Response, next: NextFunction) {
+  // Log user information for debugging
+  console.log('Checking advisor permissions:', (req as any).user);
+  
   if ((req as any).user && (req as any).user.role === 'advisor') {
+    console.log('User is an advisor, allowing access');
     next();
   } else {
+    console.log('User is not an advisor, access denied');
     res.status(403).json({ error: 'אין הרשאות מתאימות לפעולה זו' });
   }
 }
